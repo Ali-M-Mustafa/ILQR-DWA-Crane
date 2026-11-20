@@ -34,18 +34,9 @@ Overhead cranes move heavy loads in factories, warehouses and construction sites
 
 Step response to (x, y) = (20, 15) m, conventional vs. DE-tuned integral LQR (Table II of the paper):
 
-| Controller | State | Rise time (s) | Settling time (s) | Overshoot (%) |
-|---|---|---|---|---|
-| Conventional | x | 2.19 | 22.23 | 37.81 |
-| Conventional | y | 2.15 | 18.27 | 36.96 |
-| DE-tuned | x | 1.36 | 2.28 | 0.35 |
-| DE-tuned | y | 1.53 | 2.54 | 0.18 |
-
 - Settling time is about 90% shorter in x and 86% shorter in y, and overshoot drops from about 37% to below 0.4%.
 - The Lyapunov matrix of both closed loops is positive definite, so both are stable.
 - With the DWA, the crane reaches the goal on both maps: map 1 has 7 obstacles and map 2 has 42.
-
-`compare_controllers.m` reproduces Table I (gains), Table II, the Lyapunov eigenvalues and Figs. 4–6.
 
 ## Getting started
 
@@ -55,8 +46,6 @@ Step response to (x, y) = (20, 15) m, conventional vs. DE-tuned integral LQR (Ta
 - Control System Toolbox (`lqr`, `lyap`, `ss`, `lsim`, `stepinfo`)
 - Statistics and Machine Learning Toolbox (`unifrnd`, used by `de.m`)
 
-The results were checked numerically with GNU Octave 8.4 and its control package.
-
 ### 2. Install
 
 ```bash
@@ -65,31 +54,6 @@ cd ILQR-DWA-Crane/src
 ```
 
 Run all scripts from inside `src/`.
-
-### 3. Reproduce the controller results
-
-```matlab
-compare_controllers
-```
-
-This prints Table I, the Lyapunov eigenvalues and Table II, and plots Figs. 4–6. It takes a few seconds.
-
-### 4. Re-run the DE tuning (optional)
-
-```matlab
-main_deo_tuning
-```
-
-This runs DE with 50 individuals for 1000 iterations and saves the best Q and R to `deo_result.mat`. To use them, set `use_new_deo = true` in `compare_controllers.m`. DE is random, so a new run will be close to the published Q and R but not identical. Early iterations print a best cost of 1e6 until a candidate passes the validity limit.
-
-### 5. Run the path planning
-
-```matlab
-dwa_crane_optimized(1)   % map 1 (Fig. 7)
-dwa_crane_optimized(2)   % map 2 (Fig. 8)
-```
-
-This animates the planner, then draws the final figure and saves the paths to `dwa_map*.csv`, `crane1_map*.csv` and `obs_map*.csv`. A full run can take hours (see Known limitations).
 
 ## Repository structure
 
@@ -117,12 +81,6 @@ ILQR-DWA-Crane/
 - **The DWA has no collision filter.** Candidate paths are scored but never rejected, and clearance is measured only at the end of each predicted path.
 - **The controller is tested on the linear model only.** There are no actuator limits; the DE-tuned input peaks at about 3.8×10⁴.
 
-## Notes on reproduction
-
-- In eqs. 19 and 21 of the paper, −384.15 and −640.25 belong in column 2 of Ax and Ay, not column 1. The code is correct and reproduces Table I.
-- Map 1 has the 7 obstacles shown in Fig. 7; the "9" in the paper text is a typo.
-- The published Lyapunov eigenvalues come from MATLAB's `lyap(Acl, eye(8))`, the transposed form of eq. 24. Both forms prove stability.
-- The DE bounds (1e-5 to 1000), the ITAE form (time integral over 30 s) and the validity limit (1e3) match the published results but are not all stated in the paper.
 
 ## Publication
 
